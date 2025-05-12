@@ -13,7 +13,7 @@ const Profile = ({ walletAddress = '', isWalletConnected = false }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="relative mt-3">
+    <div className="relative ">
       <button
         onClick={toggleDropdown}
         className="flex items-center space-x-1 p-1.5 rounded-full bg-gradient-to-r from-blue-100 to-teal-100 hover:from-blue-200 hover:to-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all duration-300"
