@@ -1,9 +1,8 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { toast,Toaster } from "react-hot-toast";
 import { ethers } from 'ethers';
+import { castVote, getDeployedElections, getFactoryContract } from "../Utils/contractUtils.js";
 
-import axios from "axios";
-import { electionServer, server } from "../App.jsx";
 
 const ElectionContext = createContext();
 
@@ -28,6 +27,7 @@ export const ElectionProvider = ({ children }) => {
             }
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
             setWalletAddress(accounts[0]);
+            localStorage.setItem("walletAddress",accounts[0]);
             setIsWalletConnected(true);
             toast.success('Wallet connected successfully!');
         } catch (err) {
@@ -47,15 +47,29 @@ export const ElectionProvider = ({ children }) => {
         return;
     }
     setSelectedElection(election);
+    // console.log(election)
     setSelectedCandidate('');
     setShowVoteModal(true);
     };
 
-    const handleVote = async (e) => {
+    const handleVote = async (e, election, candidate) => {
         e.preventDefault();
+        // console.log(e)
         setIsLoading(true);
         setError('');
         setSuccess('');
+
+        let candidateId = -1;
+        for (let idx = 0; idx < election.candidates.length; idx++) {
+            if(election.candidates[idx].name == candidate){
+                candidateId = idx;
+                break;
+            }
+        }
+        if(candidateId == -1){
+            setError("Invalid vote");
+            return;
+        }
 
         try {
             if (!selectedCandidate) {
@@ -65,10 +79,15 @@ export const ElectionProvider = ({ children }) => {
             if (!window.ethereum) {
             throw new Error('Please install MetaMask.');
             }
-            const provider = new ethers.BrowserProvider(window.ethereum);
-            const signer = await provider.getSigner();
-            await new Promise((resolve) => setTimeout(resolve, 1500));
+            // const provider = new ethers.BrowserProvider(window.ethereum);
+            // const signer = await provider.getSigner();
+            // await new Promise((resolve) => setTimeout(resolve, 1500));
 
+            const res = await castVote(election.electionAddress, candidateId);
+            if(!res.success){
+                setError(res.message);
+                return;
+            }
             setSuccess(`Successfully voted for ${selectedCandidate} in ${selectedElection.title}!`);
             setShowVoteModal(false);
         } catch (err) {
@@ -77,54 +96,56 @@ export const ElectionProvider = ({ children }) => {
             setIsLoading(false);
         }
     };
+    
+
 
     const fetchElections = async () => {
         setIsLoading(true);
-        connectWallet()
+        if(localStorage.getItem("walletAddress")){
+            setWalletAddress(localStorage.getItem("walletAddress"));
+            setIsWalletConnected(true);
+        }
+        // try {
+        //     const {data} = await axios.get(`${electionServer}/get-election`);
+        //     setElections(data);
+        //     // console.log(data)
+        // } catch (err) {
+        //     setError('Failed to load elections.');
         try {
-            const {data} = await axios.get(`${electionServer}/get-election`);
-
-            // const data = [{
-            //     "title": "Prime minister 02",
-            //     "startDate": "2023-05-15T00:00:00.000Z",
-            //     "endDate": "2023-05-20T14:30:00.000Z",
-            //     "description": "no",
-            //     "status": "Active",
-            //     "candidates": [
-            //       {
-            //         "name": "sandeep giri",
-            //         "votes": 0,
-            //         "_id": "68184cc3ae1ef68d9b2b96f2"
-            //       },
-            //       {
-            //         "name": "Shruti sharma",
-            //         "votes": 0,
-            //         "_id": "68184cc3ae1ef68d9b2b96f3"
-            //       }
-            //     ],
-            //     "_id": "68184cc3ae1ef68d9b2b96f1",
-            //     "createdAt": "2025-05-05T05:29:39.495Z",
-            //     "updatedAt": "2025-05-05T05:29:39.495Z",
-            //     "__v": 0
-            //   },];
+            const data = await getDeployedElections();
             setElections(data);
-            console.log(data)
         } catch (err) {
-            setError('Failed to load elections.');
-        } finally {
+            setError('Failed to fetch elections:', err);
+        }
+        finally {
             setIsLoading(false);
         }
     }
 
-    const createElection = async (electionData)=> {
-        try{
-            const res =await axios.post(`${electionServer}/create-election`, electionData);
-            console.log(res.data);
-        }catch(err){
-            console.log(err.message);
-            toast.error(err.message);
+    // const createElection = async (electionData)=> {
+    //     try{
+    //         const res =await axios.post(`${electionServer}/create-election`, electionData);
+    //         console.log(res.data);
+    //     }catch(err){
+    //         console.log(err.message);
+    //         toast.error(err.message);
+    //     }
+    // }
+
+    const createElection = async ({ title, description, startDate, endDate, candidates }) => {
+        try {
+            const factory = await getFactoryContract();
+            const formattedCandidates = candidates.map((c) => c.name);
+            const start = Math.floor(new Date(startDate).getTime() / 1000); // UNIX timestamp
+            const end = Math.floor(new Date(endDate).getTime() / 1000);
+
+            const tx = await factory.createElection(title, description, start, end, formattedCandidates);
+            await tx.wait(); // Wait for transaction to be mined
+            toast.success("Election created Successfully")
+        } catch (error) {
+            toast.error(error.message);
         }
-    }
+    };
 
     return (
         <ElectionContext.Provider value={{

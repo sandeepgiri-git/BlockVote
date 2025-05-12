@@ -136,7 +136,7 @@ export const UserProvider = ({ children }) => {
 
     const logout = (navigate) => {
         try{
-            localStorage.removeItem("token");
+            localStorage.clear();
             setIsAuth(false);
             setUser([]);
             navigate('/');
