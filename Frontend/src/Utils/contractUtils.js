@@ -10,10 +10,10 @@ export const getFactoryContract = async () => {
     if (!window.ethereum) {
       throw new Error("Please install MetaMask");
     }
-  
+
     const provider = new ethers.BrowserProvider(window.ethereum); // v6
     const signer = await provider.getSigner(); // must use await here
-  
+
     return new ethers.Contract(FACTORY_ADDRESS, ElectionFactoryABI.abi, signer);
   } catch (error) {
     alert(error.message);
@@ -28,7 +28,14 @@ export const getElectionDetails = async (address) => {
     const election = new ethers.Contract(address, ElectionABI.abi, signer);
     const details = await election.getDetails(); // This calls the Solidity function
 
-    const [title, description, startTimestamp, endTimestamp, candidateNames, status] = details;
+    const [
+      title,
+      description,
+      startTimestamp,
+      endTimestamp,
+      candidateNames,
+      status,
+    ] = details;
 
     console.log("return data is: ", {
       address,
@@ -37,8 +44,8 @@ export const getElectionDetails = async (address) => {
       startDate: new Date(Number(startTimestamp) * 1000),
       endDate: new Date(Number(endTimestamp) * 1000),
       candidates: candidateNames.map((name) => ({ name })),
-      status
-    })
+      status,
+    });
     return {
       address,
       title,
@@ -46,7 +53,7 @@ export const getElectionDetails = async (address) => {
       startDate: new Date(Number(startTimestamp) * 1000),
       endDate: new Date(Number(endTimestamp) * 1000),
       candidates: candidateNames.map((name) => ({ name })),
-      status
+      status,
     };
   } catch (error) {
     console.error("Error getting election details:", error.message);
@@ -58,53 +65,61 @@ export const getDeployedElections = async () => {
   try {
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
-  
-    const factory = new ethers.Contract(FACTORY_ADDRESS, ElectionFactoryABI.abi, signer);
+
+    const factory = new ethers.Contract(
+      FACTORY_ADDRESS,
+      ElectionFactoryABI.abi,
+      signer
+    );
     const count = await factory.getElectionCount(); // returns array of addresses
-    
+
     const elections = [];
     for (let i = 0; i < count; i++) {
       let e = await factory.getElectionDetails(i);
-      
+
       let candi = await factory.getElectionCandidates(i);
 
-      let candidates = []
+      let candidates = [];
       for (let j = 0; j < candi[0].length; j++) {
-          let candidate = []
-          for (let k = 0; k < 3; k++) {
-              candidate.push(candi[k][j]);
-          }
-          let x = {
-            name: candidate[0],
-            votes: candidate[1],
-            id: candidate[2],
-          }
-          candidates.push(x);
+        let candidate = [];
+        for (let k = 0; k < 3; k++) {
+          candidate.push(candi[k][j]);
+        }
+        let x = {
+          name: candidate[0],
+          votes: Number(candidate[1]),
+          id: Number(candidate[2]),
+        };
+        candidates.push(x);
       }
-      
+
       let obj = {
         title: e.title,
         electionAddress: e.electionAddress,
         description: e.description,
         startDate: new Date(Number(e.startDate) * 1000),
         endDate: new Date(Number(e.endDate) * 1000),
-        status: new Date(Number(e.startDate) * 1000) > new Date() ? 'Pending' : new Date(Number(e.endDate) * 1000) > new Date() ? 'Active' : 'Ended',
+        status:
+          new Date(Number(e.startDate) * 1000) > new Date()
+            ? "Pending"
+            : new Date(Number(e.endDate) * 1000) > new Date()
+            ? "Active"
+            : "Ended",
         candidates,
       };
-      console.log(obj.title,obj.status);
+      // console.log(obj.title,obj.status);
       elections.push(obj);
     }
     return elections;
-
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
   }
 };
 
 export const castVote = async (electionAddress, candidateId) => {
   try {
     if (!window.ethereum) {
-      throw new Error('MetaMask not detected');
+      throw new Error("MetaMask not detected");
     }
 
     const provider = new ethers.BrowserProvider(window.ethereum);
@@ -117,8 +132,8 @@ export const castVote = async (electionAddress, candidateId) => {
 
     // Convert candidateId to BigInt if needed
     let bigIntCandidateId = 0;
-    if(candidateId != 0){
-      bigIntCandidateId = BigInt(candidateId)
+    if (candidateId != 0) {
+      bigIntCandidateId = BigInt(candidateId);
     }
 
     // Estimate gas with BigInt parameters
@@ -126,7 +141,7 @@ export const castVote = async (electionAddress, candidateId) => {
       electionAddress,
       bigIntCandidateId
     );
-    
+
     // console.log(electionAddress,bigIntCandidateId)
 
     // Add 20% buffer and convert to BigInt
@@ -135,20 +150,22 @@ export const castVote = async (electionAddress, candidateId) => {
     const tx = await factory.vote(electionAddress, bigIntCandidateId);
 
     // const receipt = await tx.wait(2);
-    console.log("success")
+    console.log("success", tx.info);
     return {
       success: true,
       // transactionHash: receipt.hash,
       // blockNumber: receipt.blockNumber
     };
-
   } catch (error) {
-    console.error('Voting failed:', error.message);
-    
+    // console.error("Voting failed:", error.message);
+
     // Improved error parsing
-    let errorMessage = 'Failed to cast vote';
+    let errorMessage = "Failed to cast vote";
     if (error?.info?.error?.data?.message) {
-      errorMessage = error.info.error.data.message.replace('execution reverted: ', '');
+      errorMessage = error.info.error.data.message.replace(
+        "execution reverted: ",
+        ""
+      );
     } else if (error?.reason) {
       errorMessage = error.reason;
     } else if (error?.message) {
@@ -157,9 +174,31 @@ export const castVote = async (electionAddress, candidateId) => {
 
     return {
       success: false,
-      error: errorMessage,
-      detailedError: error
+      error: error.reason,
+      detailedError: error,
     };
   }
 };
 
+export const winnerName = async (eAddress) => {
+  try {
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+
+    const factory = new ethers.Contract(
+      FACTORY_ADDRESS,
+      ElectionFactoryABI.abi,
+      signer
+    );
+
+    const [winnerId, name, maxVotes] = await factory.getWinner(eAddress);
+    // console.log("output: ",winnerId,name,maxVotes)
+    return {
+      id: winnerId,
+      name: name,
+      votes: maxVotes,
+    };
+  } catch (error) {
+    console.log(error.message);
+  }
+};
