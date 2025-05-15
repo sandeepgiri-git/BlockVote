@@ -52,17 +52,15 @@ contract ElectionFactory {
     }
 
     // Gets the winner of a specific election
-    function getWinner(uint electionIndex) public view returns (
-        uint winningCandidateId,
-        string memory winningCandidateName,
-        uint voteCount
+    function getWinner(address _election) public view returns (
+        uint ,
+        string memory ,
+        uint 
     ) {
-        require(electionIndex < elections.length, "Invalid election index");
-        Election election = Election(elections[electionIndex]);
+        Election election = Election(_election);
         
         // Get all candidates
         uint candidateCount = election.candidateCount();
-        require(candidateCount > 0, "No candidates in this election");
         
         // Initialize tracking variables
         uint maxVotes = 0;

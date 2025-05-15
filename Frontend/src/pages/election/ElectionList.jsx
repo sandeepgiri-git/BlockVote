@@ -20,14 +20,11 @@ const ElectionsPage = () => {
     fetchElections,
     handleVote,
     selectedCandidate,
+    handleDis,
     setSelectedCandidate,
   } = ElectionData();
 
   const [activeTab, setActiveTab] = useState("Active");
-
-  useEffect(() => {
-    fetchElections();
-  }, []);
 
   // Filter elections based on active tab
   const filteredElections =
@@ -49,36 +46,38 @@ const ElectionsPage = () => {
     },
   ];
 
+  useEffect(() => {
+    fetchElections();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-100 py-2 m:px-6 lg:px-8">
-
       <div className="flex justify-center items-center w-full ">
-            <div className="relative">
-              <input
-                type="text"
-                // value={searchQuery}
-                // onChange={handleSearch}
-                placeholder="Search by election title or contract address..."
-                className="w-sm lg:w-2xl h-auto px-4 py-2 mb-3 border border-gray-200 rounded-full shadow-sm focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition-all duration-300 bg-white bg-opacity-80 backdrop-blur-md"
-                aria-label="Search elections"
-              />
-              <svg
-                className="absolute right-3 top-3 h-4 w-5 text-gray-400"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
-
-          </div>
+        <div className="relative">
+          <input
+            type="text"
+            // value={searchQuery}
+            // onChange={handleSearch}
+            placeholder="Search election title or address"
+            className="w-xs lg:w-2xl h-auto px-4 py-2 mb-3 border border-gray-200 rounded-full shadow-sm focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition-all duration-300 bg-white bg-opacity-80 backdrop-blur-md"
+            aria-label="Search elections"
+          />
+          <svg
+            className="absolute right-3 top-3 h-4 w-5 text-gray-400"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
+      </div>
 
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8">
@@ -92,20 +91,32 @@ const ElectionsPage = () => {
         </div>
 
         <div className="mb-8 flex justify-center space-x-1 animate-fade-in">
-          {tabs.map((tab) => (
-            <button
-              key={tab.name}
-              onClick={() => setActiveTab(tab.name)}
-              className={`px-6 py-3 text-xs font-medium rounded-full transition-all duration-300 ${
-                activeTab === tab.name
-                  ? "bg-gradient-to-r from-blue-600 to-teal-600 text-white shadow-lg"
-                  : "bg-white bg-opacity-80 backdrop-blur-md text-gray-600 hover:bg-teal-50 hover:text-teal-600"
-              }`}
-              aria-label={`Show ${tab.name.toLowerCase()} elections`}
-            >
-              {tab.name} ({tab.count})
-            </button>
-          ))}
+          <div className="bg-white rounded-full">
+            {tabs.map((tab) => (
+              <button
+                key={tab.name}
+                onClick={() => setActiveTab(tab.name)}
+                className={`px-6 py-2 text-xs font-medium rounded-full transition-all duration-300 relative overflow-hidden ${
+                  activeTab === tab.name
+                    ? "text-white"
+                    : "bg-white bg-opacity-80 backdrop-blur-md text-gray-600 hover:bg-teal-50 hover:text-teal-600"
+                }`}
+                aria-label={`Show ${tab.name.toLowerCase()} elections`}
+              >
+                {/* Background gradient with scale animation */}
+                <span
+                  className={`absolute inset-0 bg-gradient-to-r from-blue-600 to-teal-600 z-0 transition-all duration-300 origin-left ${
+                    activeTab === tab.name ? "scale-x-100" : "scale-x-0"
+                  }`}
+                />
+
+                {/* Text content */}
+                <span className="relative z-10">
+                  {tab.name} ({tab.count})
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="flex justify-between items-center mb-7">
@@ -155,7 +166,12 @@ const ElectionsPage = () => {
             </button>
           ) : (
             <div className="inline-flex items-center px-4 py-2 bg-teal-100 text-teal-800 rounded-full text-sm font-medium">
-              <span className="mr-2">Connected:</span>
+              <button
+                onClick={() => handleDis()}
+                className="px-2 py-1 border border-transparent text-xs font-medium text-white bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 rounded-full mr-2"
+              >
+                Disconnect
+              </button>
               <span className="font-mono">
                 {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
               </span>
@@ -215,11 +231,11 @@ const ElectionsPage = () => {
           <PageLoader message="Loading Elections..." />
         )}
 
-        {!isLoading && elections?.length === 0 && (
+        {/* {!isLoading && elections?.length === 0 && (
           <div className="text-center text-gray-600 text-lg bg-white bg-opacity-80 backdrop-blur-md rounded-xl p-6 shadow-lg">
             No elections available at the moment.
           </div>
-        )}
+        )} */}
 
         {/* Tab Buttons */}
 
@@ -246,7 +262,7 @@ const ElectionsPage = () => {
                     {election.description}
                   </p>
                   <p className="mt-2 text-sm text-gray-600 font-mono truncate">
-                    {election.electionAddress}
+                    ID: {election.electionAddress}
                   </p>
                   <div className="mt-4 space-y-3">
                     <div className="flex items-center text-sm text-gray-500">
@@ -309,7 +325,7 @@ const ElectionsPage = () => {
                       </button>
                     ) : (
                       <Link
-                        to="/winners"
+                        to="/result"
                         className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-300"
                         aria-label={`View results for ${election.title}`}
                       >

@@ -2,12 +2,13 @@ import { Link } from 'react-router-dom';
 import Profile from '../components/ProfileBtn';
 import { UserData } from '../contexts/UserContext';
 import PageLoader from '../components/PageLoading';
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 
 export default function HomePage() {
   const { isAuth, isloading } = UserData();
   const featuresRef = useRef(null);
 
+  
   // Scroll-triggered animation for features section
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -32,7 +33,8 @@ export default function HomePage() {
     };
   }, []);
 
-  if (isloading) return <PageLoader />;
+  if (isloading) 
+    return <PageLoader />;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-100">
@@ -65,7 +67,9 @@ export default function HomePage() {
             {/* Login/Register Buttons or Profile */}
             <div className="flex items-center space-x-4">
               {isAuth ? (
-                <Profile />
+                <Suspense fallback={<PageLoader/>} >
+                  <Profile />
+                </Suspense>
               ) : (
                 <>
                   <Link
@@ -102,20 +106,27 @@ export default function HomePage() {
             Empower transparent and tamper-proof elections with blockchain technology.
           </p>
           <div className="mt-8 max-w-md mx-auto sm:flex sm:justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <Link
+            {isAuth && (<Link
               to="/elections"
               className="w-full sm:w-auto flex items-center justify-center px-8 py-3 text-base font-medium rounded-md text-white bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transform hover:scale-105 transition-all duration-300 shadow-lg"
               aria-label="View active elections"
             >
               View Elections
-            </Link>
+            </Link>)}
             <Link
+              to="/result"
+              className="w-full sm:w-auto flex items-center justify-center px-8 py-3 text-base font-medium rounded-md text-white bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transform hover:scale-105 transition-all duration-300 shadow-lg"
+              aria-label="View active elections"
+            >
+              Results
+            </Link>
+            {/* <Link
               to="/about"
               className="w-full sm:w-auto flex items-center justify-center px-8 py-3 text-base font-medium rounded-md text-teal-600 bg-white hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transform hover:scale-105 transition-all duration-300 shadow-lg"
               aria-label="Learn more about BlockVote"
             >
               Learn More
-            </Link>
+            </Link> */}
           </div>
         </div>
 

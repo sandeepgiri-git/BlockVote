@@ -17,7 +17,6 @@ const CreateElection = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [walletAddress, setWalletAddress] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -71,8 +70,19 @@ const CreateElection = () => {
       if (electionForm.candidates.some((c) => !c.name)) {
         throw new Error('All candidate names are required.');
       }
-      if (new Date(electionForm.startDate) >= new Date(electionForm.endDate)) {
-        throw new Error('End date must be after start date.');
+
+      const start = new Date(electionForm.startDate);
+      const end = new Date(electionForm.endDate);
+      const now = new Date();
+
+      // Allow immediate start or future start, but enforce 10-minute minimum duration
+      if (start < now) {
+        throw new Error('Start time must be now or in the future.');
+      }
+
+      const duration = (end - start) / (1000 * 60); // duration in minutes
+      if (duration < 10) {
+        throw new Error('Election duration must be at least 10 minutes.');
       }
       if (!isWalletConnected) {
         throw new Error('Please connect your wallet.');
@@ -86,7 +96,7 @@ const CreateElection = () => {
       if (proposalNames.length < 2) {
         throw new Error('At least two candidates are required.');
       }
-
+      
       // Create election data
       const newElection = {
         title: electionForm.title,
@@ -95,10 +105,11 @@ const CreateElection = () => {
         endDate: electionForm.endDate,
         candidates: electionForm.candidates,
       };
-
+      
       await createElection(newElection);
-
+      
       setSuccess(`Election "${electionForm.title}" deployed at ${contractAddress}`);
+      // navigate('/elections');
       setElectionForm({
         title: '',
         description: '',
@@ -111,7 +122,6 @@ const CreateElection = () => {
       setError(err.message || 'Failed to create election.');
     } finally {
       setIsLoading(false);
-      navigate('/elections');
     }
   };
 

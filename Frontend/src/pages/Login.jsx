@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ethers } from 'ethers';
 import { useNavigate } from 'react-router-dom';
 import { UserData } from '../contexts/UserContext';
+import PageLoader from '../components/PageLoading';
 
 const LoginPage = () => {
   const {
@@ -45,6 +46,9 @@ const LoginPage = () => {
     }
   };
 
+  if(isLoading){
+    return <PageLoader/>
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">

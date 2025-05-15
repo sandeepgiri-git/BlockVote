@@ -6,9 +6,9 @@ import HomePage from './pages/Home'
 import { UserData } from './contexts/UserContext'
 import CreateElection from './pages/election/ElectionPage'
 import ElectionsPage from './pages/election/ElectionList'
-import PageLoader from './components/PageLoading'
-import { ElectionData } from './contexts/ElectionContext'
 import ResultPage from './pages/election/Result'
+import CompletedElectionSummary from './pages/election/SingleElection'
+import { ElectionData } from './contexts/ElectionContext'
 // import PageLoader from './components/PageLoading'
 
 export const server = "http://localhost:3000/api/user"
@@ -16,18 +16,20 @@ export const electionServer = "http://localhost:3000/api/election"
 
 function App() {
   const {isAuth} = UserData();
+  const {isWalletConnected} = ElectionData();
 
   return (  
       <Router>
         <Routes>
-          <Route path="/" element={<HomePage/>} />
+          <Route path="/" element={isAuth ? <HomePage/> : <LoginPage/>} />
           <Route path="/dashboard" element={isAuth ? <HomePage/> : <VotingDashboard/>} />
           <Route path="/login" element={isAuth ? <HomePage/> :<LoginPage/>} />
           <Route path="/register" element={isAuth ? <HomePage/> : <RegisterPage/>} />
 
-          <Route path="/elections" element={<ElectionsPage/>}/> 
-          <Route path="/create-election" element={<CreateElection/>} />
-          <Route path="/result" element={<ResultPage/>} />
+          <Route path="/elections" element={isAuth && <ElectionsPage/>}/> 
+          <Route path="/create-election" element={isAuth ? <CreateElection/>  : <LoginPage/>} />
+          <Route path="/result" element={isAuth ? <ResultPage/> : <LoginPage/>} />
+          <Route path="/result/:id" element={isAuth ?<CompletedElectionSummary/>  : <LoginPage/>} />
           
           {/* <Route path="/loading" element={<PageLoader/>} /> */}
         </Routes>
