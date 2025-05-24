@@ -1,16 +1,15 @@
 import {User} from '../models/User.js';
 import bcrypt from "bcryptjs"
-import jwt from "jsonwebtoken";
+import jwt, { decode } from "jsonwebtoken";
 import { sendMail } from '../middlesware/sendMail.js';
 
 export const registerUser = async (req,res) => {
     try{
-        const {name,email,password} = req.body;
-
+        const {name,email,password, aadharNumber} = req.body;
         const person = await User.findOne({email});
 
         if(person){
-            return res.status(400).json({message:"Email already exists"})
+            return res.status(400).json({message:"User already exists"})
         }
 
         const hashedPassword = bcrypt.hashSync(password, 10);
@@ -18,7 +17,8 @@ export const registerUser = async (req,res) => {
         const user = new User({
             name,
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            aadharNumber,
         })
         
         const generatedOTP = Math.floor(Math.random() * 1000000);
@@ -27,6 +27,7 @@ export const registerUser = async (req,res) => {
             userId: user._id, // Store only the user ID (or minimal data)
             name: user.name,
             email: user.email,
+            aadharNumber: user.aadharNumber,
             password: user.password,
             otp: generatedOTP.toString(),
         };
@@ -91,7 +92,7 @@ export const verifyUser = async (req, res) => {
 
         // 6. Create new auth token
         const authToken = jwt.sign(
-            { _id: decoded.userId, email: decoded.email },
+            { _id: decoded.userId, email: decoded.email, name: decoded.name, aadharNumber: decoded.aadharNumber },
             process.env.jwt_Sec,
             { expiresIn: '7d' }
         );
@@ -101,7 +102,8 @@ export const verifyUser = async (req, res) => {
         const user = new User({
             name: decoded.name,
             email: decoded.email,
-            password: decoded.password
+            password: decoded.password,
+            aadharNumber: decoded.aadharNumber
         })
 
         user.save();
@@ -148,7 +150,7 @@ export const loginUser = async (req,res) => {
         }
 
         const token = jwt.sign({ userId: user._id, name: user.name, email:
-            user.email }, process.env.jwt_Sec, {
+            user.email, aadharNumber: user.aadharNumber }, process.env.jwt_Sec, {
                 expiresIn: '7d',
         });
 
@@ -172,7 +174,7 @@ export const fetchUser = async (req,res) => {
     try {
         const {token} = req.body;
         const decoded = jwt.verify(token, process.env.jwt_Sec);
-
+        console.log(decoded)
         if(!decoded){
             return res.json({
                 success: false,
@@ -180,13 +182,13 @@ export const fetchUser = async (req,res) => {
             })
         }
 
-        const user = await User.findById(decoded.userId);
+        const user = await User.findOne({email: decoded.email});
 
         if(!user){
             return res.json({
                 success: false,
                 message: "User not found"
-                })
+            })
         }
 
         return res.status(200).json({

@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast,Toaster } from "react-hot-toast";
 import axios from "axios";
-import { server } from "../App.jsx";
+import { AadharServer, server } from "../App.jsx";
 
 const UserContext = createContext();
 
@@ -18,11 +18,21 @@ export const UserProvider = ({ children }) => {
         setIsLoading(true);
         setError('');
         setSuccess('');
-    
+
         try {
             if (formData.password !== formData.confirmPassword) {
                 throw new Error('Passwords do not match');
             }
+            // console.log(formData.aadharNumber)
+            const res = await axios.post(`${AadharServer}/find`, formData);
+            console.log(res.data)
+
+            if(!res.data.success) {
+                toast.error(res.data.message);
+                return;
+            }
+
+            formData["email"] = res.data.email;
 
             const { data } = await axios.post(`${server}/register`, formData);
             
@@ -122,11 +132,13 @@ export const UserProvider = ({ children }) => {
                 const {data} = await axios.post(`${server}/me`, {
                     token: localStorage.getItem("token")
                 })
+                // console.log("data is ",data)
 
                 if(data.success){
                     setIsAuth(true);
                     setUser(data.user);
                 }
+                // console.log(user);
             }
         }catch(err){
             toast.error(err.message);

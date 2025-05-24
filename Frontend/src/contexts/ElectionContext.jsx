@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { toast, Toaster } from "react-hot-toast";
 
 import {
@@ -7,6 +7,7 @@ import {
   getFactoryContract,
   winnerName,
 } from "../Utils/contractUtils.js";
+import { UserData } from "./UserContext.jsx";
 
 const ElectionContext = createContext();
 
@@ -23,6 +24,8 @@ export const ElectionProvider = ({ children }) => {
 
   const [filteredElections, setFilteredElections] = useState([]);
   const [errorRes, setErrorRes] = useState("");
+
+  const {user} = UserData();
 
   const connectWallet = async () => {
     setIsLoading(true);
@@ -91,7 +94,7 @@ export const ElectionProvider = ({ children }) => {
       // const signer = await provider.getSigner();
       // await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      const res = await castVote(election.electionAddress, candidateId);
+      const res = await castVote(election.electionAddress, candidateId, user.aadharNumber);
       if (!res.success) {
         setError(res.error);
         return;
@@ -116,9 +119,20 @@ export const ElectionProvider = ({ children }) => {
       // Sort candidates by votes (descending) for each election
       completedElections.forEach((election) => {
         election.candidates.sort((a, b) => b.votes - a.votes);
+        let maxVote = election.candidates[0].votes;
+        let winner;
+
+        if(maxVote != 0){
+          winner = election.candidates.filter((c) => {
+            return c.votes === maxVote;
+          })
+        }
+
+        election["winner"] = winner; 
+
       });
 
-      completedElections.reverse()
+      completedElections.reverse();
 
       // Store in localStorage as a JSON string
       localStorage.setItem(
@@ -145,6 +159,7 @@ export const ElectionProvider = ({ children }) => {
 
   const fetchElections = async () => {
     setIsLoading(true);
+    // result();
     // Safely handle wallet address
     const storedAddress = localStorage.getItem("walletAddress");
     if (storedAddress) {
@@ -193,7 +208,7 @@ export const ElectionProvider = ({ children }) => {
       await tx.wait(); // Wait for transaction to be mined
       toast.success("Election created Successfully");
     } catch (error) {
-      toast.error(error.message);
+      toast.error("Failed to create election");
     }
   };
 
@@ -206,6 +221,10 @@ export const ElectionProvider = ({ children }) => {
       toast.error(err.message);
     }
   };
+
+  useEffect(() => {
+    fetchElections();
+  },[])
 
   // const result = async () => {
   //   fetchElections();

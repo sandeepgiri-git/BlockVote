@@ -31,7 +31,7 @@ contract ElectionFactory {
     }
 
     // Allows a voter to cast their vote in a specific election
-    function vote(address electionAdd, uint candidateId) public returns(bool success) {
+    function vote(address electionAdd, uint candidateId, string memory aadharNumber) public returns(bool success) {
         uint electionIndex = 10000;
         for(uint i=0;i<elections.length; i++){
             if(elections[i] == electionAdd){
@@ -46,39 +46,11 @@ contract ElectionFactory {
         require(keccak256(abi.encodePacked(status)) == keccak256(abi.encodePacked("Active")), 
                "Voting is not active");
         
-        election.vote(candidateId,msg.sender);
+        election.vote(candidateId,msg.sender, aadharNumber);
         emit Voted(msg.sender, electionIndex, candidateId);
         return true;
     }
 
-    // Gets the winner of a specific election
-    function getWinner(address _election) public view returns (
-        uint ,
-        string memory ,
-        uint 
-    ) {
-        Election election = Election(_election);
-        
-        // Get all candidates
-        uint candidateCount = election.candidateCount();
-        
-        // Initialize tracking variables
-        uint maxVotes = 0;
-        uint winnerId = 0;
-        string memory name;
-        
-        // Find candidate with most votes
-        for (uint i = 0; i < candidateCount; i++) {
-            (string memory _name,uint votes, uint id) = election.getCandidate(i);
-            if (votes > maxVotes) {
-                maxVotes = votes;
-                winnerId = id;
-                name = _name;
-            }
-        }
-            
-        return (winnerId, name, maxVotes);
-    }
 
     // [Previous functions remain unchanged...]
     function getElections() public view returns (address[] memory) {
