@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 import ElectionFactoryABI from "../../../Contract/artifacts/contracts/ElectionFactory.sol/ElectionFactory.json";
 import ElectionABI from "../../../Contract/artifacts/contracts/Election.sol/Election.json";
 
-const FACTORY_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Update this
+export const FACTORY_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Update this
 //npx hardhat run scripts/deployFactory.js --network localhost
 
 export const getFactoryContract = async () => {
@@ -116,69 +116,120 @@ export const getDeployedElections = async () => {
   }
 };
 
-export const castVote = async (electionAddress, candidateId) => {
+// export const castVote = async (electionAddress, candidateId, aadharNumber) => {
+//   try {
+//     if (!window.ethereum) {
+//       throw new Error("MetaMask not detected");
+//     }
+
+//     const provider = new ethers.BrowserProvider(window.ethereum);
+//     const signer = await provider.getSigner();
+//     const factory = new ethers.Contract(
+//       FACTORY_ADDRESS,
+//       ElectionFactoryABI.abi,
+//       signer
+//     );
+
+//     // Convert candidateId to BigInt if needed
+//     let bigIntCandidateId = 0;
+//     if (candidateId != 0) {
+//       bigIntCandidateId = BigInt(candidateId);
+//     }
+
+//     console.log("gasEstimate")
+
+    
+//     // Estimate gas with BigInt parameters
+//     const gasEstimate = await factory.vote.estimateGas(
+//         electionAddress,
+//         bigIntCandidateId,
+//         aadharNumber
+//       );
+      
+      
+//       // console.log(electionAddress,bigIntCandidateId)
+      
+//       // Add 20% buffer and convert to BigInt
+//       const gasLimit = BigInt(Math.floor(Number(gasEstimate) * 1.2));
+      
+
+//     const tx = await factory.vote(electionAddress, bigIntCandidateId, aadharNumber);
+
+//     // const receipt = await tx.wait(2);
+//     console.log("success", tx.info);
+//     return {
+//       success: true,
+//       // transactionHash: receipt.hash,
+//       // blockNumber: receipt.blockNumber
+//     };
+//   } catch (error) {
+//     // console.error("Voting failed:", error.message);
+//     console.log(error)
+//     // Improved error parsing
+//     let errorMessage = "Failed to cast vote";
+//     if (error?.info?.error?.data?.message) {
+//       errorMessage = error.info.error.data.message.replace(
+//         "execution reverted: ",
+//         ""
+//       );
+//     } else if (error?.reason) {
+//       errorMessage = error.reason;
+//     } else if (error?.message) {
+//       errorMessage = error.message;
+//     }
+
+//     return {
+//       success: false,
+//       error: error.reason,
+//       detailedError: error,
+//     };
+//   }
+// };
+
+export const castVote = async (electionAddress, candidateId, aadharNumber) => {
   try {
-    if (!window.ethereum) {
-      throw new Error("MetaMask not detected");
-    }
+    if (!window.ethereum) throw new Error("MetaMask not detected");
 
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
+    
+    // Use the correct ABI - this is critical!
     const factory = new ethers.Contract(
       FACTORY_ADDRESS,
-      ElectionFactoryABI.abi,
+      [
+        // Make sure this matches the actual contract
+        "function vote(address, uint256, string memory)"
+      ],
       signer
     );
 
-    // Convert candidateId to BigInt if needed
-    let bigIntCandidateId = 0;
-    if (candidateId != 0) {
-      bigIntCandidateId = BigInt(candidateId);
-    }
-
-    // Estimate gas with BigInt parameters
     const gasEstimate = await factory.vote.estimateGas(
+        electionAddress,
+        candidateId,
+        aadharNumber
+      );
+
+    const tx = await factory.vote(
       electionAddress,
-      bigIntCandidateId
+      candidateId, // Handle undefined/null
+      aadharNumber,
+      { gasLimit: 300000 } // Add safe gas limit
     );
 
-    // console.log(electionAddress,bigIntCandidateId)
-
-    // Add 20% buffer and convert to BigInt
-    const gasLimit = BigInt(Math.floor(Number(gasEstimate) * 1.2));
-
-    const tx = await factory.vote(electionAddress, bigIntCandidateId);
-
-    // const receipt = await tx.wait(2);
-    console.log("success", tx.info);
+    const receipt = await tx.wait();
     return {
       success: true,
-      // transactionHash: receipt.hash,
-      // blockNumber: receipt.blockNumber
+      transactionHash: receipt.hash
     };
   } catch (error) {
-    // console.error("Voting failed:", error.message);
-
-    // Improved error parsing
-    let errorMessage = "Failed to cast vote";
-    if (error?.info?.error?.data?.message) {
-      errorMessage = error.info.error.data.message.replace(
-        "execution reverted: ",
-        ""
-      );
-    } else if (error?.reason) {
-      errorMessage = error.reason;
-    } else if (error?.message) {
-      errorMessage = error.message;
-    }
-
+    console.error("Voting failed:", error.reason);
     return {
       success: false,
-      error: error.reason,
-      detailedError: error,
+      error: error.reason || error.message
     };
   }
 };
+
 
 export const winnerName = async (eAddress) => {
   try {

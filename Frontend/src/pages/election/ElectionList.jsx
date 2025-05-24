@@ -24,14 +24,19 @@ const ElectionsPage = () => {
     setSelectedCandidate,
   } = ElectionData();
 
-  const [activeTab, setActiveTab] = useState("Active");
+  const [activeTab, setActiveTab] = useState("All");
 
   // Filter elections based on active tab
   const filteredElections =
-    elections?.filter((e) => e.status === activeTab) || [];
+    elections?.filter((e) => (e.status === activeTab || activeTab === "All")) || [];
 
+  filteredElections.reverse();
   // Tab options
   const tabs = [
+    {
+      name: "All",
+      count: elections?.filter((e) => true).length || 0
+    },
     {
       name: "Active",
       count: elections?.filter((e) => e.status === "Active").length || 0,
@@ -52,6 +57,22 @@ const ElectionsPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-100 py-2 m:px-6 lg:px-8">
+      <Link
+          to="/"
+          className="inline-flex mb-3 items-center px-4 py-2 text-sm font-medium text-teal-600 bg-teal-50 hover:bg-teal-100 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transform hover:scale-105 transition-all duration-300"
+          aria-label="Back to elections"
+        >
+          <svg
+            className="w-5 h-5 mr-2"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back To Home
+        </Link>
       <div className="flex justify-center items-center w-full ">
         <div className="relative">
           <input
@@ -80,23 +101,23 @@ const ElectionsPage = () => {
       </div>
 
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h2 className="text-4xl font-extrabold text-gray-900 sm:text-5xl animate-fade-in">
             Vote in Elections
           </h2>
           <div className="mt-2 h-1 w-20 bg-gradient-to-r from-blue-500 to-teal-500 mx-auto rounded"></div>
-          <p className="mt-2 text-lg text-gray-600">
+          <p className="mt-2 md:text-lg text-sm text-gray-600">
             Participate in secure, transparent elections powered by blockchain.
           </p>
         </div>
 
-        <div className="mb-8 flex justify-center space-x-1 animate-fade-in">
+        <div className="mb-6 flex justify-center space-x-1 animate-fade-in">
           <div className="bg-white rounded-full">
             {tabs.map((tab) => (
               <button
                 key={tab.name}
                 onClick={() => setActiveTab(tab.name)}
-                className={`px-6 py-2 text-xs font-medium rounded-full transition-all duration-300 relative overflow-hidden ${
+                className={`md:px-6 px-5 py-1 text-xs font-medium rounded-full transition-all duration-300 relative overflow-hidden ${
                   activeTab === tab.name
                     ? "text-white"
                     : "bg-white bg-opacity-80 backdrop-blur-md text-gray-600 hover:bg-teal-50 hover:text-teal-600"
@@ -241,7 +262,7 @@ const ElectionsPage = () => {
 
         {/* Elections Display */}
         <div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 "
           key={activeTab}
         >
           {filteredElections.length === 0 ? (
@@ -325,7 +346,7 @@ const ElectionsPage = () => {
                       </button>
                     ) : (
                       <Link
-                        to="/result"
+                        to={`/result/${election.electionAddress}`}
                         className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-300"
                         aria-label={`View results for ${election.title}`}
                       >

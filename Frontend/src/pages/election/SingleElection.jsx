@@ -120,9 +120,17 @@ const CompletedElectionSummary = () => {
         <div className="bg-white bg-opacity-80 backdrop-blur-md shadow-lg sm:rounded-xl sm:p-6 border border-teal-100 animate-slide-in">
           {/* Winner */}
           <div className="mb-8 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Winner</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">{!election.winner ? "No one voted" : election.winner?.length == 1 ? "Winner" : "Draw"}</h2>
             <div className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-lg px-4 py-2 animate-fade-in">
-              <span className="text-lg font-medium">{winner.name}</span>
+              <span className="text-lg font-medium">{election.candidates[0].votes != 0 && (election?.winner?.length == 1 ? election.winner[0]?.name : 
+                                <div className='flex flex-col gap-2 '>
+                                  {election.winner?.map((c) => (
+                                    <p key={c.name}>
+                                      {c.name} 
+                                    </p>
+                                  ))}
+                                </div>
+                              )}</span>
               <span className="text-sm">
                 {winner.votes} votes ({votePercentages.find((p) => p.name === winner.name).percentage.toFixed(1)}%)
               </span>

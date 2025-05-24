@@ -20,7 +20,7 @@ const RegisterPage = () => {
 
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
+    aadharNumber: '',
     password: '',
     confirmPassword: '',
   });
@@ -138,7 +138,7 @@ const RegisterPage = () => {
                 onClick={() => setIsWalletRegistration(false)}
                 aria-label="Switch to email registration"
               >
-                Email Registration
+                Aadhar Registration
               </button>
               <button
                 type="button"
@@ -197,22 +197,20 @@ const RegisterPage = () => {
 
               <div>
                 <label
-                  htmlFor="email"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Email Address
+                  Aadhar number 
                 </label>
                 <div className="relative mt-1">
                   <input
                     id="email"
-                    name="email"
-                    type="email"
+                    name="aadharNumber"
                     autoComplete="email"
                     required
-                    value={formData.email}
+                    value={formData.aadharNumber}
                     onChange={handleChange}
                     className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white bg-opacity-80 backdrop-blur-md sm:text-sm transition-all duration-300"
-                    placeholder="you@example.com"
+                    placeholder="123456789012"
                     aria-label="Email address"
                   />
                   <svg
@@ -522,7 +520,7 @@ const RegisterPage = () => {
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-300 transform hover:scale-105"
                 aria-label="Switch to email registration"
               >
-                Email Registration
+                Aadhar Registration
               </button>
             </form>
           )}

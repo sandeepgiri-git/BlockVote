@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ElectionData } from '../../contexts/ElectionContext';
 import PageLoader from '../../components/PageLoading';
 import { ethers } from 'ethers';
+import { FACTORY_ADDRESS } from '../../Utils/contractUtils';
+import toast from 'react-hot-toast';
 
 const CreateElection = () => {
   const { createElection, isWalletConnected, connectWallet  } = ElectionData();
@@ -56,6 +58,19 @@ const CreateElection = () => {
     }
   };
 
+  const checkDuplicate = (electionForm) => {
+    // console.log("checking")
+    for (let index = 0; index < electionForm.candidates.length; index++) {
+        for (let j = index+1; j < electionForm.candidates.length; j++) {
+          // console.log(electionForm.candidates[index] , electionForm.candidates[j])
+          if(electionForm.candidates[index].name.trim() == electionForm.candidates[j].name.trim()) {
+            return true;
+          }
+        }
+    }
+    return false;
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -69,6 +84,14 @@ const CreateElection = () => {
       }
       if (electionForm.candidates.some((c) => !c.name)) {
         throw new Error('All candidate names are required.');
+      }
+      if (electionForm.candidates.length < 2) {
+        throw new Error('Minimum two candidates required.');
+      }
+
+      if(checkDuplicate(electionForm)){
+        console.log(electionForm)
+        throw new Error('Duplicate candidate names are not allowed.');
       }
 
       const start = new Date(electionForm.startDate);
@@ -108,8 +131,9 @@ const CreateElection = () => {
       
       await createElection(newElection);
       
-      setSuccess(`Election "${electionForm.title}" deployed at ${contractAddress}`);
-      // navigate('/elections');
+      setSuccess(`Election "${electionForm.title}" deployed`);
+      // toast.success(`Election "${electionForm.title}" deployed`);
+      navigate('/elections');
       setElectionForm({
         title: '',
         description: '',

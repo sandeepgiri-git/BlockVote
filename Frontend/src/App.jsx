@@ -12,6 +12,7 @@ import { ElectionData } from './contexts/ElectionContext'
 // import PageLoader from './components/PageLoading'
 
 export const server = "http://localhost:3000/api/user"
+export const AadharServer = "http://localhost:3000/api/aadhar"
 export const electionServer = "http://localhost:3000/api/election"
 
 function App() {

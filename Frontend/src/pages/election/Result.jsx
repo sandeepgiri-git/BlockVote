@@ -4,11 +4,12 @@ import { Link } from 'react-router-dom';
 import PageLoader from '../../components/PageLoading';
 import { ElectionData } from '../../contexts/ElectionContext';
 import { CalendarIcon } from '@heroicons/react/24/outline';
+import { FaChessKing } from 'react-icons/fa';
 
 const ResultPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const {isWalletConnected, connectWallet,fetchElections ,filteredElections, setFilteredElections,isLoading,errorRes,result} = ElectionData();
+  const {isWalletConnected, connectWallet ,filteredElections, setFilteredElections,isLoading,errorRes,result} = ElectionData();
   const [search, setSearch] = useState([])
   const handleSearch = (e) => {
     console.log(filteredElections);
@@ -24,9 +25,9 @@ const ResultPage = () => {
     setFilteredElections(filtered);
   };
 
-  useEffect(() => {
-    fetchElections()
-  }, []);
+  // useEffect(() => {
+  //   fetchElections()
+  // }, []);
 
 //   useEffect(() => {
 //   const loadData = async () => {
@@ -187,14 +188,19 @@ const ResultPage = () => {
                       <div className="mt-2 pt-2 border-t border-gray-200">
                         <div className="flex items-center justify-between">
                           <div className='flex flex-row items-center gap-1 md:gap-3'>
-                            <p className="md:text-xl font-medium text-gray-500">Winner:</p>
+                            <p className="md:text-xl font-medium text-gray-500">{election.candidates[0].votes == 0 ? "No one voted" : election?.winner?.length == 1 ? "Winner:" : "Draw:"}</p>
                             <div className="flex items-center mt-1">
-                              <div className="md:h-8 md:w-8 h-5 w-5 rounded-full bg-yellow-100 flex items-center justify-center mr-1">
+                              {election.candidates[0].votes != 0 && election.winner.length==1 && <div className="md:h-8 md:w-8 h-5 w-5 rounded-full bg-yellow-100 flex items-center justify-center mr-1">
                                 <svg className="h-5 w-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                 </svg>
-                              </div>
-                              <h4 className="md:text-lg  font-bold text-gray-800">{election?.candidates[0].name}</h4>
+                              </div>}
+                              {/* <h4 className="md:text-lg  font-bold text-gray-800">{election.candidates[0].votes != 0 && election?.winner?.length == 1 ? election?.candidates[0].name : election.winner?.map((e) => (<p key={e.name}>{e.name}ksdubvks</p>))}</h4> */}
+                              <h4 className="md:text-lg  font-bold text-gray-800">{election.candidates[0].votes != 0 && (election?.winner?.length == 1 ? election.winner[0]?.name : 
+                                <div className='flex flex-row gap-2 '>
+                                  {election.winner?.map(c => c.name.trim()).join(", ")}
+                                </div>
+                              )}</h4>
                             </div>
                           </div>
                           <div className="flex flex-row items-center gap-3 bg-teal-50 rounded-lg px-2 py-0 md:px-3 md:py-2">

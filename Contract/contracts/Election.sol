@@ -18,6 +18,7 @@ contract Election {
 
     mapping(uint => Candidate) public candidates;
     mapping(address => bool) public voters;
+    mapping(bytes32 => bool) public votersAadhar;
 
     constructor(
         string memory _title,
@@ -38,13 +39,17 @@ contract Election {
         }
     }
 
-    function vote(uint _candidateId, address sender) public {
-        require(block.timestamp >= startDate, "Voting not started");
-        require(block.timestamp <= endDate, "Voting ended");
+
+    function vote(uint _candidateId, address sender, string memory aadharNumber) public {
+        bytes32 hashedAadhar = keccak256(abi.encodePacked(aadharNumber));
+
         require(!voters[sender], "Already voted");
+        require(!votersAadhar[hashedAadhar], "Aadhaar already used to vote");
+
         require(_candidateId >= 0 && _candidateId < candidateCount, "Invalid candidate");
 
         voters[sender] = true;
+        votersAadhar[hashedAadhar] = true;
         candidates[_candidateId].voteCount++;
     }
 
@@ -53,6 +58,7 @@ contract Election {
         Candidate memory c = candidates[index];
         return (c.name, c.voteCount, c.id);
     }
+
 
     function getDetails() public view returns (
         string memory,
