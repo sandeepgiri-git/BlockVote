@@ -16,7 +16,7 @@ export const AadharServer = "http://localhost:3000/api/aadhar"
 export const electionServer = "http://localhost:3000/api/election"
 
 function App() {
-  const {isAuth} = UserData();
+  const {isAuth, isAdmin} = UserData();
   const {isWalletConnected} = ElectionData();
 
   return (  
@@ -28,7 +28,7 @@ function App() {
           <Route path="/register" element={isAuth ? <HomePage/> : <RegisterPage/>} />
 
           <Route path="/elections" element={isAuth && <ElectionsPage/>}/> 
-          <Route path="/create-election" element={isAuth ? <CreateElection/>  : <LoginPage/>} />
+          <Route path="/create-election" element={isAuth && isAdmin ? <CreateElection/>  : <h5>Access Denied</h5> } />
           <Route path="/result" element={isAuth ? <ResultPage/> : <LoginPage/>} />
           <Route path="/result/:id" element={isAuth ?<CompletedElectionSummary/>  : <LoginPage/>} />
           

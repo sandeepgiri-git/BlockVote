@@ -2,7 +2,9 @@ import { ethers } from "ethers";
 import ElectionFactoryABI from "../../../Contract/artifacts/contracts/ElectionFactory.sol/ElectionFactory.json";
 import ElectionABI from "../../../Contract/artifacts/contracts/Election.sol/Election.json";
 
-export const FACTORY_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Update this
+export const FACTORY_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; 
+// Update this
+// npx hardhat node
 //npx hardhat run scripts/deployFactory.js --network localhost
 
 export const getFactoryContract = async () => {
@@ -10,7 +12,7 @@ export const getFactoryContract = async () => {
     if (!window.ethereum) {
       throw new Error("Please install MetaMask");
     }
-
+    
     const provider = new ethers.BrowserProvider(window.ethereum); // v6
     const signer = await provider.getSigner(); // must use await here
 

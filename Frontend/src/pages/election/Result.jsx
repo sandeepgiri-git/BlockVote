@@ -1,22 +1,19 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageLoader from '../../components/PageLoading';
 import { ElectionData } from '../../contexts/ElectionContext';
 import { CalendarIcon } from '@heroicons/react/24/outline';
-import { FaChessKing } from 'react-icons/fa';
 
 const ResultPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const {isWalletConnected, connectWallet ,filteredElections, setFilteredElections,isLoading,errorRes,result} = ElectionData();
-  const [search, setSearch] = useState([])
   const handleSearch = (e) => {
     console.log(filteredElections);
     setFilteredElections(JSON.parse(localStorage.getItem("endedElections")) || [])
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
-    // console.log(query)
     const filtered = filteredElections.filter(
       (election) =>
         (election?.title?.toString().toLowerCase().includes(query) ||
@@ -25,28 +22,6 @@ const ResultPage = () => {
     setFilteredElections(filtered);
   };
 
-  // useEffect(() => {
-  //   fetchElections()
-  // }, []);
-
-//   useEffect(() => {
-//   const loadData = async () => {
-//     // Load cached data immediately for better UX
-//     const stored = localStorage.getItem("endedElections");
-//     if (stored) {
-//       try {
-//         setFilteredElections(JSON.parse(stored));
-//       } catch (e) {
-//         console.error("Failed to parse stored elections", e);
-//       }
-//     }
-    
-//     // Then fetch fresh data
-//     await result();
-//   };
-
-//   loadData();
-// }, []); // Empty dependency array to run only once on mount
 
   if(isLoading)
      return <PageLoader/>;

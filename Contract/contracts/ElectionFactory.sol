@@ -19,12 +19,14 @@ contract ElectionFactory {
     event Voted(address indexed voter, uint indexed electionIndex, uint candidateId);
 
     function createElection(
+        bool isAdmin,
         string memory title,
         string memory description,
         uint startDate,
         uint endDate,
         string[] memory candidateNames
     ) public {
+        require(isAdmin, "Only admin can create Election");
         Election election = new Election(title, description, startDate, endDate, candidateNames);
         elections.push(address(election));
         emit ElectionCreated(address(election));

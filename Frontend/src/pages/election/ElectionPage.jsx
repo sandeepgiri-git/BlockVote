@@ -5,9 +5,11 @@ import PageLoader from '../../components/PageLoading';
 import { ethers } from 'ethers';
 import { FACTORY_ADDRESS } from '../../Utils/contractUtils';
 import toast from 'react-hot-toast';
+import { UserData } from '../../contexts/UserContext';
 
 const CreateElection = () => {
   const { createElection, isWalletConnected, connectWallet  } = ElectionData();
+  const {isAdmin} = UserData();
   const navigate = useNavigate();
   const [electionForm, setElectionForm] = useState({
     title: '',
@@ -90,7 +92,7 @@ const CreateElection = () => {
       }
 
       if(checkDuplicate(electionForm)){
-        console.log(electionForm)
+        // console.log(electionForm)
         throw new Error('Duplicate candidate names are not allowed.');
       }
 
@@ -126,6 +128,7 @@ const CreateElection = () => {
         description: electionForm.description,
         startDate: electionForm.startDate,
         endDate: electionForm.endDate,
+        isAdmin: isAdmin,
         candidates: electionForm.candidates,
       };
       

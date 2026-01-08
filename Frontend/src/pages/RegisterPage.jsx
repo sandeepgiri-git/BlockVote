@@ -21,6 +21,7 @@ const RegisterPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     aadharNumber: '',
+    email: '',
     password: '',
     confirmPassword: '',
   });
@@ -140,7 +141,7 @@ const RegisterPage = () => {
               >
                 Aadhar Registration
               </button>
-              <button
+              {/* <button
                 type="button"
                 className={`relative py-2 px-6 rounded-md text-sm font-medium transition-all duration-300 ${
                   isWalletRegistration
@@ -151,7 +152,7 @@ const RegisterPage = () => {
                 aria-label="Switch to wallet registration"
               >
                 Wallet Registration
-              </button>
+              </button> */}
             </div>
           </div>
 
@@ -203,15 +204,50 @@ const RegisterPage = () => {
                 </label>
                 <div className="relative mt-1">
                   <input
-                    id="email"
+                    id="aadhar"
                     name="aadharNumber"
-                    autoComplete="email"
+                    autoComplete="aadharNumber"
                     required
                     value={formData.aadharNumber}
                     onChange={handleChange}
                     className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white bg-opacity-80 backdrop-blur-md sm:text-sm transition-all duration-300"
                     placeholder="123456789012"
-                    aria-label="Email address"
+                    aria-label="Aadhar Number"
+                  />
+                  <svg
+                    className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <div>
+                <label
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Email address
+                </label>
+                <div className="relative mt-1">
+                  <input
+                    id="email"
+                    name="email"
+                    autoComplete="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white bg-opacity-80 backdrop-blur-md sm:text-sm transition-all duration-300"
+                    placeholder="abc@gmail.com"
+                    aria-label="Email Address"
                   />
                   <svg
                     className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"

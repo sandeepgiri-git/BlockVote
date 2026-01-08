@@ -12,6 +12,7 @@ export const UserProvider = ({ children }) => {
     const [success, setSuccess] = useState('');
     const [showOtpCard, setShowOtpCard] = useState(false);
     const [isAuth, setIsAuth] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const handleSubmit = async (e, formData) => {
         e.preventDefault();
@@ -25,14 +26,19 @@ export const UserProvider = ({ children }) => {
             }
             // console.log(formData.aadharNumber)
             const res = await axios.post(`${AadharServer}/find`, formData);
-            console.log(res.data)
+            // console.log(res.data)
 
-            if(!res.data.success) {
-                toast.error(res.data.message);
+            if(res.data.success) {
+                toast.error("Your Aadhar is already used in another email");
                 return;
             }
+            
+            const result = await axios.post(`${AadharServer}/`, formData);
 
-            formData["email"] = res.data.email;
+            if(!result.data.success) {
+                toast.error(result.data.message)
+                return;
+            }
 
             const { data } = await axios.post(`${server}/register`, formData);
             
@@ -79,7 +85,7 @@ export const UserProvider = ({ children }) => {
             setIsAuth(true);
             setSuccess('Account created successfully! Redirecting...');
             toast.success('Account created successfully!');
-            
+            await fetchUser();
             navigate("/");
         } catch (err) {
             setError(err.response?.data?.message || err.message || 'OTP verification failed');
@@ -137,8 +143,14 @@ export const UserProvider = ({ children }) => {
                 if(data.success){
                     setIsAuth(true);
                     setUser(data.user);
+                }else {
+                    return;
                 }
-                // console.log(user);
+
+                const res = await axios.post(`${server}/admin`, {email: data.user.email});
+                if(res.data.success) {
+                    setIsAdmin(true);
+                }
             }
         }catch(err){
             toast.error(err.message);
@@ -152,6 +164,7 @@ export const UserProvider = ({ children }) => {
             setIsAuth(false);
             setUser([]);
             navigate('/');
+            window.location.reload();
         }catch(err){
             toast.error("Something went wrong")
         }
@@ -184,6 +197,7 @@ export const UserProvider = ({ children }) => {
             setEmail,
             setPassword,
             user,
+            isAdmin,
             logout
         }}>
             {children}

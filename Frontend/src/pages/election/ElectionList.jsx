@@ -2,7 +2,8 @@ import { CalendarIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 import { ElectionData } from "../../contexts/ElectionContext";
 import { useEffect, useState } from "react";
 import PageLoader from "../../components/PageLoading";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { UserData } from "../../contexts/UserContext";
 
 const ElectionsPage = () => {
   const {
@@ -22,7 +23,10 @@ const ElectionsPage = () => {
     selectedCandidate,
     handleDis,
     setSelectedCandidate,
+    result
   } = ElectionData();
+
+  const {isAdmin} = UserData();
 
   const [activeTab, setActiveTab] = useState("All");
 
@@ -50,6 +54,13 @@ const ElectionsPage = () => {
       count: elections?.filter((e) => e.status === "Ended").length || 0,
     },
   ];
+
+  const navigate =  useNavigate();
+
+  const handleViewResult = async (electionAddress) => {
+    await result();
+    navigate(`/result/${electionAddress}`);
+  }
 
   useEffect(() => {
     fetchElections();
@@ -199,7 +210,7 @@ const ElectionsPage = () => {
             </div>
           )}
 
-          <Link
+          {isAdmin && <Link
             to="/create-election"
             className={`inline-flex items-center px-6 py-3 border border-transparent text-xs font-medium rounded-full text-white bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 ${
               isLoading ? "opacity-70 cursor-not-allowed" : "animate-pulse"
@@ -233,7 +244,7 @@ const ElectionsPage = () => {
             ) : (
               <>Create Election</>
             )}
-          </Link>
+          </Link>}
         </div>
 
         {error && (
@@ -345,13 +356,14 @@ const ElectionsPage = () => {
                         Voting Not Started
                       </button>
                     ) : (
-                      <Link
-                        to={`/result/${election.electionAddress}`}
+                      <button
+                        onClick={()=>handleViewResult(election.electionAddress)}
+                        // to={`/result/${election.electionAddress}`}
                         className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-300"
                         aria-label={`View results for ${election.title}`}
                       >
                         View Results
-                      </Link>
+                      </button>
                     )}
                   </div>
                 </div>

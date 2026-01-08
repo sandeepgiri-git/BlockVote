@@ -191,6 +191,7 @@ export const ElectionProvider = ({ children }) => {
     startDate,
     endDate,
     candidates,
+    isAdmin
   }) => {
     try {
       const factory = await getFactoryContract();
@@ -199,11 +200,12 @@ export const ElectionProvider = ({ children }) => {
       const end = Math.floor(new Date(endDate).getTime() / 1000);
 
       const tx = await factory.createElection(
+        isAdmin,
         title,
         description,
         start,
         end,
-        formattedCandidates
+        formattedCandidates,
       );
       await tx.wait(); // Wait for transaction to be mined
       toast.success("Election created Successfully");
@@ -221,7 +223,7 @@ export const ElectionProvider = ({ children }) => {
       toast.error(err.message);
     }
   };
-
+  
   useEffect(() => {
     fetchElections();
   },[])

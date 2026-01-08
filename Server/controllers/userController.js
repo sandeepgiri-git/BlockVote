@@ -174,7 +174,7 @@ export const fetchUser = async (req,res) => {
     try {
         const {token} = req.body;
         const decoded = jwt.verify(token, process.env.jwt_Sec);
-        console.log(decoded)
+        // console.log(decoded)
         if(!decoded){
             return res.json({
                 success: false,
@@ -201,6 +201,32 @@ export const fetchUser = async (req,res) => {
         return res.status(500).json({
             success: false,
             message: "Something went wrong"
+        })
+    }
+}
+
+export const AdminAccess = (req, res) => {
+    const {email} = req.body;
+    // console.log(req.body);
+    
+    try {
+        if(email == "sandeep0786giri@gmail.com" || email == "er.sandeep.giri25@gmail.com") {
+            return res.json({
+                success: true,
+                message: ""
+            })
+        }
+        else {
+            return res.json({
+                success: false,
+                message: "Permission Denied"
+            })
+        }
+        
+    } catch (error) {
+        res.json({
+            success: false,
+            message: error.message
         })
     }
 }

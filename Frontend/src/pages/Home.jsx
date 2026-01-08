@@ -5,7 +5,7 @@ import PageLoader from '../components/PageLoading';
 import { Suspense, useEffect, useRef } from 'react';
 
 export default function HomePage() {
-  const { isAuth, isloading } = UserData();
+  const { isAuth, isloading, isAdmin } = UserData();
   const featuresRef = useRef(null);
 
   
@@ -68,6 +68,7 @@ export default function HomePage() {
             <div className="flex items-center space-x-4">
               {isAuth ? (
                 <Suspense fallback={<PageLoader/>} >
+                  <h2 className='font-bold my-2 text-2xl'>{isAdmin && "Admin"}</h2>
                   <Profile />
                 </Suspense>
               ) : (
@@ -105,7 +106,7 @@ export default function HomePage() {
           <p className="mt-4 max-w-2xl mx-auto text-lg sm:text-xl text-gray-600 leading-relaxed">
             Empower transparent and tamper-proof elections with blockchain technology.
           </p>
-          <div className="mt-8 max-w-md mx-auto sm:flex sm:justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+          <div className="mt-8 max-w-xl mx-auto sm:flex sm:justify-center space-y-4 sm:space-y-0 sm:space-x-4">
             {isAuth && (<Link
               to="/elections"
               className="w-full sm:w-auto flex items-center justify-center px-8 py-3 text-base font-medium rounded-md text-white bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transform hover:scale-105 transition-all duration-300 shadow-lg"
@@ -120,6 +121,13 @@ export default function HomePage() {
             >
               Results
             </Link>
+            {isAdmin && <Link
+              to="/create-election"
+              className="w-full sm:w-auto flex items-center justify-center px-8 py-3 text-base font-medium rounded-md text-white bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transform hover:scale-105 transition-all duration-300 shadow-lg"
+              aria-label="View active elections"
+            >
+              Create Election
+            </Link>}
             {/* <Link
               to="/about"
               className="w-full sm:w-auto flex items-center justify-center px-8 py-3 text-base font-medium rounded-md text-teal-600 bg-white hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transform hover:scale-105 transition-all duration-300 shadow-lg"
